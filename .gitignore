@@ -1,0 +1,12 @@
+output
+old
+.venv
+.env
+**/.venv
+*.png
+*.mp4
+*.mov
+out
+Thumbs.db
+**/__pycache__
+

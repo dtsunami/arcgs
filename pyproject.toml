@@ -1,0 +1,71 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "arcgs"
+version = "0.1.0"
+description = "Open-source Gaussian Splatting pipeline for Intel Arc and NVIDIA GPUs"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+keywords = ["gaussian-splatting", "3dgs", "intel-arc", "nerf", "3d-reconstruction"]
+authors = [{ name = "arcgs contributors" }]
+
+dependencies = [
+    "typer>=0.12",
+    "rich>=13",
+    "requests>=2.32",
+    "numpy>=1.26",
+    "Pillow>=10",
+    "tqdm>=4.66",
+    # XPU build (Intel Arc) — install with:
+    #   pip install torch --index-url https://download.pytorch.org/whl/xpu
+    # CPU fallback ships from PyPI but shows "+cpu" and has no GPU support.
+    "torch>=2.6",
+    "python-dotenv>=1.0",
+    "tomli>=2.0; python_version < '3.11'",
+    # gsplat: pure-Python 3DGS training — works on XPU, CUDA, and CPU.
+    # CUDA extension compilation may fail on XPU (that's fine; Python fallback is used).
+    "gsplat>=1.0",
+    "packaging",
+    # viser: WebGL viewer served from Python — used by arcgs view and --live training.
+    "viser>=0.2",
+    # Dashboard: interactive training monitor (render vs GT vs diff, mask painter, pruning).
+    "fastapi>=0.111",
+    "uvicorn[standard]>=0.29",
+    "jinja2>=3.1",
+    "python-multipart>=0.0.9",
+]
+
+
+[project.scripts]
+arcgs = "arcgs.cli:app"
+
+[project.urls]
+Homepage = "https://github.com/your-org/arcgs"
+Issues = "https://github.com/your-org/arcgs/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["arcgs"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = false
+ignore_missing_imports = true
+
+# PyTorch XPU builds live on a separate index — plain PyPI gives the +cpu stub.
+# uv reads this automatically; pip users must pass --index-url on the CLI (see README).
+[[tool.uv.index]]
+url = "https://download.pytorch.org/whl/xpu"
+explicit = true  # only used for packages that explicitly reference this index
+
+[[tool.uv.index]]
+url = "https://pypi.org/simple"
+default = true
